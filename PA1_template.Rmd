@@ -13,25 +13,30 @@ This assignment makes use of data from a personal activity monitoring device. Th
 ## Loading and preprocessing the data
 ```{r loading, echo=TRUE}
 library(data.table)
+# unzip and load data to a data.table
 data <- fread(unzip("activity.zip"))
-
-
-
+# create and apply a weekend factor variable and convert data column
+weekdays <- c('Monday', 'Tuesday', 'Wednesday','Thursday', 'Friday')
+data$date <- as.Date(data$date)
+data$wEnd <- factor((weekdays(data$date) %in% weekdays), levels=c(FALSE, TRUE), labels=c('weekend', 'weekday'))
 ```
-
 ## What is mean total number of steps taken per day?
 ```{r means, echo=TRUE}
-
-
+dstep<- data[,.(steps.Sum=sum(steps)),by=date]
+hist(dstep$steps.Sum, breaks=40)
+paste("Mean is", mean(dstep$steps.Sum, na.rm=TRUE))
+paste("Median is", median(dstep$steps.Sum, na.rm=TRUE))
 ```
 ## What is the average daily activity pattern?
 ```{r pattern, echo=TRUE}
-
-
+intstep <- data[,.(int.mean=mean(steps, na.rm=TRUE)),by=data$interval]
+plot(intstep$data, intstep$int.mean, type = "l", xlab="Intervals for 24 hours", ylab="Averaged steps in interval across days")
+maxint<-intstep[,.SD[which.max(int.mean)]]
+paste("The", maxint$data, "interval has the most steps")
 ```
 ## Imputing missing values
 ```{r missing, echo=TRUE}
-
+paste("There are", sum(is.na(data$steps)), "NA values")
 
 ```
 ## Are there differences in activity patterns between weekdays and weekends?
